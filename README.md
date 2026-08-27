@@ -38,7 +38,7 @@ docker compose ps
 sed -n 's/^BOOTSTRAP_ADMIN_USERNAME=//p' .env
 ```
 
-OpenAPI JSON 位于后端容器内 `/api-docs`，Swagger UI 为 `/docs`；出于最小暴露原则，Nginx 默认不向公开入口代理运维端点。
+OpenAPI JSON 位于后端容器内 `/api-docs`，Swagger UI 为 `/docs`；仓库同时保存从真实运行实例导出的 [`docs/openapi.json`](docs/openapi.json)。出于最小暴露原则，Nginx 默认不向公开入口代理运维端点。
 
 ## 常用命令
 
@@ -92,8 +92,10 @@ deliverables/     课程答辩材料（生成后）
 - [系统设计](docs/architecture.md)
 - [ER 图](docs/er-diagram.md)
 - [API 说明](docs/api.md)
+- [OpenAPI JSON](docs/openapi.json)
 - [部署与运维](docs/deployment.md)
 - [测试报告](docs/test-report.md)
+- [答辩材料](deliverables/README.md)
 - [协作规范](CONTRIBUTING.md)
 
 ## 许可证

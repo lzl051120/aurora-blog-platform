@@ -12,5 +12,10 @@ output/playwright/test-results/
 output/playwright/report/
 artifacts/
 backups/
+/.tmp/
+deliverables/*.war
+deliverables/*.mp4
+deliverables/*.inspect.ndjson
+deliverables/aurora-blog-defense/
 /.harness/
 /AGENTS.md
