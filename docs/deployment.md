@@ -1,5 +1,7 @@
 # 部署与运维
 
+第一次接触 Git 或 Docker 时，请优先阅读[从零到一部署指南（小白版）](beginner-deployment-guide.md)。本文保留给已经熟悉命令行的维护者作为速查。
+
 ## 本地部署
 
 ```bash
