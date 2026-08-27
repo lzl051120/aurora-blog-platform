@@ -49,4 +49,6 @@ Running 30 tests using 1 worker
 - 本报告证明本地 Docker 一键部署，不代表已经公网部署。
 - 正式实验报告 DOCX 按当前要求暂不创建。
 
-GitHub Actions 结果将在最终推送后单独核验；只有远端任务全部成功，需求清单对应项才会勾选。
+## GitHub Actions
+
+公开仓库远端运行 `33060952724` 已成功完成：前端质量检查 26 秒、后端测试与 WAR 53 秒、Docker 与真实浏览器闭环 3 分 6 秒。Actions 还给出旧版官方 Action 使用 Node 20 的弃用提醒，但 GitHub runner 已自动使用 Node 24 执行；该提醒不影响本次成功结论。
