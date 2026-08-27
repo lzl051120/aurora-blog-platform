@@ -1,0 +1,16 @@
+.DS_Store
+.env
+*.log
+.idea/
+.vscode/
+backend/target/
+backend/data/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+output/playwright/test-results/
+output/playwright/report/
+artifacts/
+backups/
+/.harness/
+/AGENTS.md
