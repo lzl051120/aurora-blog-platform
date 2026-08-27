@@ -1,0 +1,91 @@
+name: Aurora 全栈持续集成
+
+on:
+  push:
+    branches: [main, "feature/**", "fix/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: 前端质量检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npm run test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+  backend:
+    name: 后端测试与 WAR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 构建镜像并执行后端测试
+        run: docker build -t aurora-blog-backend-ci ./backend
+      - name: 提取 WAR
+        run: |
+          container_id=$(docker create aurora-blog-backend-ci)
+          docker cp "$container_id:/app/aurora-blog.war" aurora-blog.war
+          docker rm "$container_id"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aurora-blog-war
+          path: aurora-blog.war
+          if-no-files-found: error
+
+  integration:
+    name: Docker 与真实浏览器闭环
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: 生成一次性本地凭据
+        run: ./scripts/setup-env.sh
+      - name: 启动完整系统
+        run: docker compose up --build -d
+      - name: 核验服务健康
+        run: |
+          docker compose ps
+          curl --retry 20 --retry-delay 3 --retry-all-errors -fsS http://localhost:8080/api/v1/home
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - name: 执行三视口真实路径与 WCAG 扫描
+        working-directory: frontend
+        run: |
+          set -a
+          source ../.env
+          set +a
+          E2E_ADMIN_USERNAME="$BOOTSTRAP_ADMIN_USERNAME" E2E_ADMIN_PASSWORD="$BOOTSTRAP_ADMIN_PASSWORD" npm run test:e2e
+      - name: 保存浏览器报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: output/playwright/
+          if-no-files-found: warn
+      - name: 输出容器日志
+        if: always()
+        run: docker compose logs --no-color --tail=300

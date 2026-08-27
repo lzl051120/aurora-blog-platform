@@ -1,0 +1,19 @@
+name: 缺陷报告
+description: 报告可以稳定复现的问题
+title: "[缺陷] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes: { label: 问题描述, description: 请说明实际结果与期望结果 }
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes: { label: 复现步骤, placeholder: "1. 启动...\n2. 打开...\n3. 点击..." }
+    validations: { required: true }
+  - type: input
+    id: environment
+    attributes: { label: 环境, placeholder: "macOS / Chrome / Docker 版本" }
+  - type: textarea
+    id: evidence
+    attributes: { label: 日志或截图, description: 请先移除密码、Cookie 和 Token }

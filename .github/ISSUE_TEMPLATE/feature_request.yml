@@ -1,0 +1,16 @@
+name: 功能建议
+description: 提出有明确用户价值的改进
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: 用户问题, description: 这个建议解决谁的什么问题？ }
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes: { label: 建议方案 }
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes: { label: 验收标准 }
