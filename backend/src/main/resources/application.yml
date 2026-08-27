@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: aurora-blog-backend
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/aurora_blog?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DB_USERNAME:aurora}
+    password: ${DB_PASSWORD:aurora_dev_password}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  session:
+    timeout: 8h
+    redis:
+      namespace: aurora:session
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8081}
+  servlet:
+    session:
+      cookie:
+        name: AURORA_SESSION
+        http-only: true
+        same-site: lax
+        secure: ${COOKIE_SECURE:false}
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+
+springdoc:
+  swagger-ui:
+    path: /docs
+  api-docs:
+    path: /api-docs
+
+aurora:
+  upload-dir: ${UPLOAD_DIR:./data/uploads}
+  bootstrap-admin:
+    username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:ChangeMe123!}
+    email: ${BOOTSTRAP_ADMIN_EMAIL:admin@aurora.local}
+
+logging:
+  level:
+    com.aurora.blog: INFO
