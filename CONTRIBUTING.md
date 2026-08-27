@@ -1,5 +1,7 @@
 # 中文协作规范
 
+第一次参与仓库协作时，请先阅读[GitHub 团队协作指南](docs/github-team-collaboration.md)，其中包含成员权限、Issue、分支、PR、Review、冲突解决和发布的完整流程。
+
 ## 分支
 
 - `main`：始终保持可构建、可验收。

@@ -94,7 +94,10 @@ deliverables/     课程答辩材料（生成后）
 - [API 说明](docs/api.md)
 - [OpenAPI JSON](docs/openapi.json)
 - [部署与运维](docs/deployment.md)
+- [从零到一部署指南（小白版）](docs/beginner-deployment-guide.md)
 - [测试报告](docs/test-report.md)
+- [后续优化建议表](docs/optimization-roadmap.md)
+- [GitHub 团队协作指南](docs/github-team-collaboration.md)
 - [答辩材料](deliverables/README.md)
 - [协作规范](CONTRIBUTING.md)
 
