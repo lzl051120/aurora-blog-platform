@@ -1,0 +1,83 @@
+import { expect, test } from '@playwright/test'
+
+const adminUser = process.env.E2E_ADMIN_USERNAME || 'admin'
+const adminPassword = process.env.E2E_ADMIN_PASSWORD || 'ChangeMe123!'
+const baseURL = process.env.E2E_BASE_URL || 'http://localhost:8080'
+
+test('管理员发布文章，游客可以真实阅读', async ({ page }) => {
+  await page.goto('/auth')
+  await page.getByLabel('用户名或邮箱').fill(adminUser)
+  await page.getByLabel('密码').fill(adminPassword)
+  await page.getByRole('button', { name: '进入 Aurora' }).click()
+  await expect(page).toHaveURL(/\/admin/)
+  await page.getByRole('link', { name: /新建文章/ }).click()
+  const suffix = Date.now().toString().slice(-7)
+  await page.getByPlaceholder('文章标题').fill(`真实路径验收手记 ${suffix}`)
+  await page.getByPlaceholder(/值得读完/).fill('由真实浏览器创建、发布并再次读取的验收文章。')
+  await page.locator('.tiptap').fill('这是一篇通过完整前后端路径写入数据库的文章，用来证明发布链路真实可用。')
+  await page.getByRole('button', { name: '发布文章' }).click()
+  await expect(page).toHaveURL(/\/admin$/)
+  await page.context().clearCookies()
+  await page.goto('/posts')
+  await page.getByPlaceholder('搜索标题或摘要').fill(suffix)
+  await page.getByRole('button', { name: '筛选' }).click()
+  await expect(page.getByText(`真实路径验收手记 ${suffix}`)).toBeVisible()
+  await page.getByText(`真实路径验收手记 ${suffix}`).click()
+  await expect(page.getByText('这是一篇通过完整前后端路径写入数据库的文章')).toBeVisible()
+})
+
+test('普通用户注册、留言并看到待审反馈', async ({ page }) => {
+  const suffix = Date.now().toString().slice(-7)
+  await page.goto('/auth')
+  await page.getByRole('tab', { name: '注册' }).click()
+  await page.getByLabel('用户名').fill(`reader_${suffix}`)
+  await page.getByLabel('显示昵称').fill(`读者${suffix}`)
+  await page.getByLabel('邮箱').fill(`reader_${suffix}@example.com`)
+  await page.getByLabel('密码').fill('ReaderPass123!')
+  await page.getByRole('button', { name: '创建账号' }).click()
+  await expect(page).toHaveURL(/\/profile/)
+  await page.goto('/guestbook')
+  await page.getByLabel('写下想说的话').fill(`真实留言 ${suffix}`)
+  await page.getByRole('button', { name: '送出留言' }).click()
+  await expect(page.getByText('留言已提交，审核通过后展示')).toBeVisible()
+})
+
+test('用户评论经管理员审核后公开显示', async ({ browser }) => {
+  const suffix = Date.now().toString().slice(-7)
+  const commentText = `审核闭环评论 ${suffix}`
+
+  const userContext = await browser.newContext({ baseURL })
+  const userPage = await userContext.newPage()
+  await userPage.goto('/auth')
+  await userPage.getByRole('tab', { name: '注册' }).click()
+  await userPage.getByLabel('用户名').fill(`commenter_${suffix}`)
+  await userPage.getByLabel('显示昵称').fill(`评论者${suffix}`)
+  await userPage.getByLabel('邮箱').fill(`commenter_${suffix}@example.com`)
+  await userPage.getByLabel('密码').fill('ReaderPass123!')
+  await userPage.getByRole('button', { name: '创建账号' }).click()
+  await expect(userPage).toHaveURL(/\/profile/)
+  await userPage.goto('/posts/writing-systems-clearly')
+  await userPage.getByLabel('留下你的想法').fill(commentText)
+  await userPage.getByRole('button', { name: '提交审核' }).click()
+  await expect(userPage.getByText('评论已提交，审核通过后展示')).toBeVisible()
+  await userContext.close()
+
+  const adminContext = await browser.newContext({ baseURL })
+  const adminPage = await adminContext.newPage()
+  await adminPage.goto('/auth')
+  await adminPage.getByLabel('用户名或邮箱').fill(adminUser)
+  await adminPage.getByLabel('密码').fill(adminPassword)
+  await adminPage.getByRole('button', { name: '进入 Aurora' }).click()
+  await adminPage.getByRole('button', { name: /评论/ }).click()
+  const moderationItem = adminPage.locator('.moderation-list article').filter({ hasText: commentText })
+  await expect(moderationItem).toBeVisible()
+  await moderationItem.getByRole('button', { name: '通过' }).click()
+  await expect(moderationItem.getByText('APPROVED')).toBeVisible()
+  await adminContext.close()
+
+  const visitorContext = await browser.newContext({ baseURL })
+  const visitorPage = await visitorContext.newPage()
+  await visitorPage.goto('/posts/writing-systems-clearly')
+  await expect(visitorPage.getByText(commentText)).toBeVisible()
+  await visitorContext.close()
+})
